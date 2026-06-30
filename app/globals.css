@@ -1,0 +1,399 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Theme tokens (Tailwind v4 — configured straight from CSS, no JS config).
+   A candlelit-room palette: oxblood, amber-gold, rose, near-black.
+--------------------------------------------------------------------------- */
+@theme inline {
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+
+  --color-oxblood: #3a0a14;
+  --color-burgundy: #5a0f1e;
+  --color-amber: #d9a04e;
+  --color-gold: #f0c987;
+  --color-rose: #c0303a;
+  --color-rose-deep: #7a121c;
+  --color-near-black: #0a0506;
+  --color-candle: #ffb368;
+  --color-cream: #f4e9d8;
+}
+
+:root {
+  --background: #0a0506;
+  --foreground: #f4e9d8;
+  color-scheme: dark;
+}
+
+html {
+  /* Lenis drives scrolling; keep the native fallback graceful. */
+  scroll-behavior: auto;
+}
+
+body {
+  background:
+    radial-gradient(
+      120% 90% at 50% 8%,
+      rgba(90, 15, 30, 0.55) 0%,
+      rgba(58, 10, 20, 0.35) 30%,
+      rgba(10, 5, 6, 1) 72%
+    ),
+    #0a0506;
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Lenis recommended styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+/* ---------------------------------------------------------------------------
+   Typography helpers
+--------------------------------------------------------------------------- */
+.font-serif {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+.font-sans {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.text-shadow-glow {
+  text-shadow:
+    0 0 24px rgba(217, 160, 78, 0.35),
+    0 0 60px rgba(192, 48, 58, 0.25);
+}
+
+/* ---------------------------------------------------------------------------
+   Glassmorphism card — used very sparingly for text panels.
+--------------------------------------------------------------------------- */
+.glass {
+  background: linear-gradient(
+    160deg,
+    rgba(40, 12, 18, 0.28),
+    rgba(10, 5, 6, 0.12)
+  );
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(217, 160, 78, 0.14);
+  box-shadow:
+    0 20px 60px -20px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ---------------------------------------------------------------------------
+   Film grain + dust overlay — a single fixed layer over the whole page.
+--------------------------------------------------------------------------- */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: grain-shift 0.7s steps(4) infinite;
+}
+
+@keyframes grain-shift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3%, 2%);
+  }
+  50% {
+    transform: translate(2%, -3%);
+  }
+  75% {
+    transform: translate(-2%, -2%);
+  }
+  100% {
+    transform: translate(3%, 1%);
+  }
+}
+
+/* A soft, fixed vignette so DOM corners melt into the dark even outside WebGL. */
+.vignette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  background: radial-gradient(
+    115% 100% at 50% 45%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Horizontal photo / video gallery
+--------------------------------------------------------------------------- */
+.gallery-card {
+  position: relative;
+  flex: 0 0 auto;
+  /* XL: keyed to viewport WIDTH so each photo is a big focal element. */
+  width: min(78vw, 620px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.gallery-media {
+  position: relative;
+  width: 100%;
+  /* XL with a firm pixel floor so it never collapses on short windows. */
+  height: clamp(440px, 80vh, 880px);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: #1a0509;
+  border: 1px solid rgba(217, 160, 78, 0.22);
+  box-shadow:
+    0 30px 80px -30px rgba(0, 0, 0, 0.9),
+    0 0 50px -10px rgba(192, 48, 58, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition:
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-media img,
+.gallery-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* soft warm wash + top-down vignette so captions read over any photo */
+.gallery-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      to top,
+      rgba(10, 5, 6, 0.55),
+      transparent 38%
+    ),
+    radial-gradient(
+      120% 80% at 50% 120%,
+      rgba(192, 48, 58, 0.18),
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+.gallery-card:hover .gallery-media {
+  transform: translateY(-8px) scale(1.012);
+  box-shadow:
+    0 40px 90px -30px rgba(0, 0, 0, 0.95),
+    0 0 70px -8px rgba(217, 160, 78, 0.5);
+}
+
+.gallery-num {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.4em;
+  color: rgba(217, 160, 78, 0.75);
+}
+
+.gallery-note {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.5rem, 3.2vh, 2.2rem);
+  line-height: 1.35;
+  color: rgba(244, 233, 216, 0.95);
+}
+
+.gallery-badge {
+  position: absolute;
+  top: 1.1rem;
+  left: 1.1rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(244, 233, 216, 0.92);
+  background: rgba(10, 5, 6, 0.5);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(217, 160, 78, 0.3);
+}
+
+/* ---------------------------------------------------------------------------
+   Birthday game — gifts, cake, modal, confetti
+--------------------------------------------------------------------------- */
+
+/* Gift boxes gently float; lift & glow on hover. */
+@keyframes gift-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1deg);
+  }
+}
+.gift {
+  cursor: pointer;
+  width: clamp(150px, 22vw, 230px);
+  filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.55));
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.45s ease;
+  animation: gift-float 5s ease-in-out infinite;
+}
+.gift:nth-child(2n) {
+  animation-duration: 6.2s;
+  animation-delay: -1.4s;
+}
+.gift:nth-child(3n) {
+  animation-duration: 5.6s;
+  animation-delay: -2.8s;
+}
+.gift:hover {
+  transform: translateY(-10px) scale(1.05);
+  filter: drop-shadow(0 30px 50px rgba(192, 48, 58, 0.5));
+}
+.gift.is-opened {
+  cursor: default;
+  opacity: 0.55;
+  animation: none;
+}
+.gift.is-opened:hover {
+  transform: none;
+}
+
+/* Candle flame flicker on the cake. */
+@keyframes flame-flicker {
+  0%,
+  100% {
+    transform: scaleY(1) scaleX(1) translateY(0);
+    opacity: 0.95;
+  }
+  40% {
+    transform: scaleY(1.15) scaleX(0.92) translateY(-1px);
+    opacity: 1;
+  }
+  70% {
+    transform: scaleY(0.92) scaleX(1.06) translateY(1px);
+    opacity: 0.85;
+  }
+}
+.flame {
+  transform-origin: center bottom;
+  animation: flame-flicker 0.5s ease-in-out infinite;
+}
+.flame:nth-child(2n) {
+  animation-duration: 0.62s;
+}
+.flame:nth-child(3n) {
+  animation-duration: 0.44s;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(6, 3, 4, 0.72);
+  backdrop-filter: blur(14px) saturate(120%);
+}
+.modal-panel {
+  position: relative;
+  width: min(94vw, 900px);
+  max-height: 90vh;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(40, 12, 18, 0.6), rgba(10, 5, 6, 0.6));
+  border: 1px solid rgba(217, 160, 78, 0.28);
+  box-shadow:
+    0 50px 120px -30px rgba(0, 0, 0, 0.9),
+    0 0 80px -10px rgba(192, 48, 58, 0.4);
+}
+.modal-panel video {
+  width: 100%;
+  max-height: 72vh;
+  display: block;
+  background: #000;
+  object-fit: contain;
+}
+
+/* Confetti pieces */
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gift,
+  .flame {
+    animation: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll hint
+--------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   Scroll hint
+--------------------------------------------------------------------------- */
+@keyframes scroll-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+.scroll-hint-dot {
+  animation: scroll-bob 2.4s ease-in-out infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Respect prefers-reduced-motion — calm everything down.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .grain-overlay,
+  .scroll-hint-dot {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Hide default scrollbar for a cleaner cinematic frame (still scrollable). */
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
